@@ -8,7 +8,7 @@
 AmThucQuan4/
 ├── AmThucQuan4.Native/     # .NET MAUI Android App
 ├── AmThucQuan4.API/        # ASP.NET Core Web API
-├── WebApp/                 # React + TypeScript (phiên bản web)
+├── Database/               # Setup Database
 └── AmThucQuan4.sln         # Visual Studio Solution
 ```
 
