@@ -1,0 +1,55 @@
+import { useEffect } from 'react'
+import { HashRouter as BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from './stores/useAuthStore'
+
+// User app
+import AuthLayout    from './features/auth/AuthLayout'
+import ProtectedRoute from './features/auth/ProtectedRoute'
+import LoginPage     from './pages/LoginPage'
+import RegisterPage  from './pages/RegisterPage'
+import MapPage       from './pages/MapPage'
+
+// Admin
+import AdminLayout    from './admin/components/AdminLayout'
+import DashboardPage  from './admin/pages/DashboardPage'
+import PoiManagement  from './admin/pages/PoiManagement'
+import TourBuilder    from './admin/pages/TourBuilder'
+
+export default function App() {
+  const hydrate = useAuthStore((s) => s.hydrate)
+
+  useEffect(() => { hydrate() }, [hydrate])
+
+  return (
+    <BrowserRouter>
+      <Routes>
+
+        {/* ── User Auth ── */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login"    element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Route>
+
+        {/* ── User Map (protected) ── */}
+        <Route path="/map" element={
+          <ProtectedRoute><MapPage /></ProtectedRoute>
+        } />
+
+        {/* ── Admin (protected) ── */}
+        <Route path="/admin" element={
+          <ProtectedRoute><AdminLayout /></ProtectedRoute>
+        }>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="pois"      element={<PoiManagement />} />
+          <Route path="tours"     element={<TourBuilder />} />
+        </Route>
+
+        {/* Default */}
+        <Route path="/"  element={<Navigate to="/map"   replace />} />
+        <Route path="*"  element={<Navigate to="/map"   replace />} />
+
+      </Routes>
+    </BrowserRouter>
+  )
+}

@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* ── Admin shared classes ── */
+.label-xs {
+  @apply block text-xs font-semibold text-gray-500 mb-1.5 ml-0.5;
+}
+.input-base {
+  @apply px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm
+         focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent
+         transition-all;
+}
+.err-txt {
+  @apply text-xs text-red-500 mt-1 ml-0.5;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   USER MARKER - Mũi tên chỉ hướng đi
+═══════════════════════════════════════════ */
+.user-marker-wrap {
+  width: 36px;
+  height: 36px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-marker-arrow {
+  width: 36px;
+  height: 36px;
+  /* Transition khi xoay hướng */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.5));
+}
+
+/* ═══════════════════════════════════════════
+   POI PULSE - Vòng sóng lan toả khi trigger
+═══════════════════════════════════════════ */
+@keyframes poi-pulse-ring {
+  0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(3);   opacity: 0; }
+}
+
+.poi-pulse-wrap {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+}
+
+.poi-pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  border: 2.5px solid #f97316;
+  border-radius: 50%;
+  animation: poi-pulse-ring 1.5s ease-out infinite;
+}
+
+.poi-pulse-ring:nth-child(2) { animation-delay: 0.5s; }
+.poi-pulse-ring:nth-child(3) { animation-delay: 1.0s; }
