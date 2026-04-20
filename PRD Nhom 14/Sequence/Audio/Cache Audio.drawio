@@ -1,0 +1,80 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
+    <mxGraphModel dx="1281" dy="770" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-1" value="User" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;" vertex="1" parent="1">
+          <mxGeometry x="44" y="37" width="35" height="642" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-2" value="UI" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="244" y="37" width="150" height="642" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-3" value="Cache" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="444" y="37" width="150" height="642" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-4" value="API" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="644" y="37" width="150" height="642" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-5" value="alt" style="shape=umlFrame;dashed=1;pointerEvents=0;dropTarget=0;strokeColor=#1A1A1A;height=20;width=30" vertex="1" parent="1">
+          <mxGeometry x="308" y="220" width="422" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-6" value="[Cache exists]" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="CSEyDV-ydf7e5-sPOHOC-5">
+          <mxGeometry x="30" width="392" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-7" value="[Download audio]" style="shape=line;dashed=1;whiteSpace=wrap;verticalAlign=top;labelPosition=center;verticalLabelPosition=middle;align=center;strokeColor=#B3B3B3;" vertex="1" parent="CSEyDV-ydf7e5-sPOHOC-5">
+          <mxGeometry y="106" width="422" height="3" as="geometry" />
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-8" value="Request audio" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-1" target="CSEyDV-ydf7e5-sPOHOC-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="228" y="146" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-9" value="Check cache" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-2" target="CSEyDV-ydf7e5-sPOHOC-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="428" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-10" value="Return audio" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-3" target="CSEyDV-ydf7e5-sPOHOC-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="431" y="301" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-11" value="Request audio" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-2" target="CSEyDV-ydf7e5-sPOHOC-4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="528" y="402" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-12" value="Audio file" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-4" target="CSEyDV-ydf7e5-sPOHOC-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="531" y="456" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-13" value="Save audio" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-2" target="CSEyDV-ydf7e5-sPOHOC-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="428" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CSEyDV-ydf7e5-sPOHOC-14" value="Play audio" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="CSEyDV-ydf7e5-sPOHOC-2" target="CSEyDV-ydf7e5-sPOHOC-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="231" y="574" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
