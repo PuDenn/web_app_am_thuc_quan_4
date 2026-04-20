@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+    xmlns:vm="clr-namespace:AmThucQuan4.Native.ViewModels"
+    xmlns:models="clr-namespace:AmThucQuan4.Native.Models"
+    xmlns:conv="clr-namespace:AmThucQuan4.Native.Converters"
+    x:Class="AmThucQuan4.Native.Views.MainPage"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#0f172a">
+
+  <ContentPage.Resources>
+    <conv:NullToBoolConverter      x:Key="NullToBool" />
+    <conv:BoolToAudioTextConverter x:Key="BoolToAudioText" />
+    <conv:InvertBoolConverter      x:Key="InvertBool" />
+  </ContentPage.Resources>
+
+  <!-- Root: Header / Map+Overlay / Search -->
+  <Grid RowDefinitions="56,*,64">
+
+    <!-- ═══════════════════════════════════
+         ROW 0 — HEADER
+    ═══════════════════════════════════ -->
+    <Grid Grid.Row="0"
+          BackgroundColor="#1e293b"
+          ColumnDefinitions="*,Auto"
+          Padding="16,0">
+
+      <VerticalStackLayout Grid.Column="0"
+                           VerticalOptions="Center"
+                           Spacing="1">
+        <Label Text="🍜 Ẩm Thực Quận 4"
+               TextColor="#f97316"
+               FontSize="18"
+               FontAttributes="Bold" />
+        <Label Text="{Binding StatusText}"
+               TextColor="#94a3b8"
+               FontSize="11" />
+      </VerticalStackLayout>
+
+      <StackLayout Grid.Column="1" Orientation="Horizontal"
+                   Spacing="6" VerticalOptions="Center">
+
+        <!-- Language picker -->
+        <Button x:Name="btnLang"
+                Text="🇻🇳"
+                Clicked="OnLanguageClicked"
+                BackgroundColor="#0f172a"
+                TextColor="White"
+                CornerRadius="20"
+                FontSize="18"
+                Padding="8,4"
+                BorderColor="#334155"
+                BorderWidth="1" />
+
+        <!-- Chọn vị trí của bạn trên bản đồ -->
+        <Button x:Name="btnPickLocation"
+                Text="📌"
+                Clicked="OnPickLocationModeClicked"
+                BackgroundColor="#0e7490"
+                TextColor="White"
+                CornerRadius="20"
+                FontSize="16"
+                Padding="8,4" />
+
+        <!-- Admin (chỉ Admin thấy) -->
+        <Button x:Name="btnAdmin"
+                Text="⚙️"
+                Clicked="OnAdminClicked"
+                BackgroundColor="#7c3aed"
+                TextColor="White"
+                CornerRadius="20"
+                FontSize="16"
+                Padding="8,4"
+                IsVisible="False" />
+
+        <!-- Đăng xuất -->
+        <Button Text="🚪"
+                Clicked="OnLogoutClicked"
+                BackgroundColor="#991b1b"
+                TextColor="White"
+                CornerRadius="20"
+                FontSize="16"
+                Padding="8,4" />
+      </StackLayout>
+    </Grid>
+
+    <!-- ═══════════════════════════════════
+         ROW 1 — MAP + OVERLAYS
+    ═══════════════════════════════════ -->
+    <Grid Grid.Row="1">
+
+      <!-- BẢNG ĐỒ MAPSUI -->
+      <mapsui:MapControl x:Name="mapControl" />
+
+      <!-- LOADING -->
+      <ActivityIndicator
+          IsRunning="{Binding IsBusy}"
+          IsVisible="{Binding IsBusy}"
+          Color="#f97316"
+          WidthRequest="40"
+          HeightRequest="40"
+          HorizontalOptions="Center"
+          VerticalOptions="Center"
+          ZIndex="5" />
+
+      <!-- ═══ POI LIST BOTTOM SHEET ═══ -->
+      <Grid x:Name="bottomSheet"
+            VerticalOptions="End"
+            ZIndex="10"
+            HeightRequest="300">
+
+        <Border BackgroundColor="#1e293b"
+                StrokeShape="RoundRectangle 20,20,0,0"
+                StrokeThickness="0">
+          <Grid RowDefinitions="28,40,*">
+
+            <!-- Handle -->
+            <BoxView Grid.Row="0"
+                     WidthRequest="36" HeightRequest="5"
+                     CornerRadius="3"
+                     Color="#475569"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center">
+              <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnSheetHandleTapped" />
+              </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <!-- Sheet header -->
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,Auto"
+                  Padding="16,0">
+              <Label Grid.Column="0"
+                     Text="{Binding UiNearbyPlaces}"
+                     TextColor="White"
+                     FontSize="15"
+                     FontAttributes="Bold"
+                     VerticalOptions="Center" />
+              <Label Grid.Column="1"
+                     Text="{Binding Pois.Count, StringFormat='{0}'}"
+                     TextColor="#64748b"
+                     FontSize="12"
+                     VerticalOptions="Center" />
+            </Grid>
+
+            <!-- CollectionView POI list -->
+            <CollectionView Grid.Row="2"
+                            ItemsSource="{Binding Pois}"
+                            SelectionMode="None">
+              <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:PoiModel">
+                  <Grid ColumnDefinitions="52,*,70"
+                        Padding="12,10"
+                        BackgroundColor="Transparent">
+
+                    <Grid.GestureRecognizers>
+                      <TapGestureRecognizer
+                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}},
+                                            Path=SelectPoiCommand}"
+                          CommandParameter="{Binding .}" />
+                    </Grid.GestureRecognizers>
+
+                    <!-- Icon -->
+                    <Border Grid.Column="0"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            BackgroundColor="#7c3aed"
+                            StrokeShape="RoundRectangle 22"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                      <Label Text="{Binding CategoryIcon}"
+                             FontSize="22"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Info -->
+                    <VerticalStackLayout Grid.Column="1"
+                                         Padding="10,0,0,0"
+                                         VerticalOptions="Center"
+                                         Spacing="2">
+                      <Label Text="{Binding Name}"
+                             TextColor="White"
+                             FontSize="14"
+                             FontAttributes="Bold"
+                             LineBreakMode="TailTruncation" />
+                      <Label Text="{Binding Category}"
+                             TextColor="#f97316"
+                             FontSize="12" />
+                      <Label Text="{Binding Address}"
+                             TextColor="#64748b"
+                             FontSize="11"
+                             LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <!-- Distance + Price -->
+                    <VerticalStackLayout Grid.Column="2"
+                                          VerticalOptions="Center"
+                                          HorizontalOptions="End"
+                                          Spacing="3">
+                      <Label Text="{Binding DistanceText}"
+                             TextColor="#22d3ee"
+                             FontSize="12"
+                             FontAttributes="Bold"
+                             HorizontalOptions="End" />
+                      <Label Text="{Binding PriceRange}"
+                             TextColor="#4ade80"
+                             FontSize="11"
+                             HorizontalOptions="End" />
+                    </VerticalStackLayout>
+                  </Grid>
+                </DataTemplate>
+              </CollectionView.ItemTemplate>
+            </CollectionView>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <!-- ═══ DETAIL PANEL (khi chọn POI) ═══ -->
+      <Grid x:Name="detailPanel"
+            IsVisible="{Binding IsDetailVisible}"
+            VerticalOptions="End"
+            ZIndex="20">
+
+        <Border BackgroundColor="#0f172a"
+                StrokeShape="RoundRectangle 20,20,0,0"
+                StrokeThickness="1"
+                Stroke="#334155"
+                Padding="20,16,20,24">
+
+          <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+
+            <!-- Header: tên + nút đóng -->
+            <Grid Grid.Row="0"
+                  ColumnDefinitions="*,40"
+                  Margin="0,0,0,10">
+              <VerticalStackLayout Grid.Column="0" Spacing="2">
+                <Label Text="{Binding SelectedPoi.Name}"
+                       TextColor="White"
+                       FontSize="20"
+                       FontAttributes="Bold" />
+                <Label Text="{Binding SelectedPoi.Category}"
+                       TextColor="#f97316"
+                       FontSize="13" />
+              </VerticalStackLayout>
+              <Button Grid.Column="1"
+                      Text="✕"
+                      Command="{Binding CloseDetailCommand}"
+                      BackgroundColor="Transparent"
+                      TextColor="#94a3b8"
+                      FontSize="18"
+                      Padding="0"
+                      VerticalOptions="Start" />
+            </Grid>
+
+            <!-- Ảnh món ăn -->
+            <Frame Grid.Row="1"
+                   CornerRadius="12"
+                   Padding="0"
+                   HasShadow="False"
+                   BorderColor="Transparent"
+                   HeightRequest="150"
+                   Margin="0,0,0,10"
+                   IsClippedToBounds="True">
+              <Image Source="{Binding SelectedPoi.ImageUrl}"
+                     Aspect="AspectFill"
+                     HeightRequest="150" />
+            </Frame>
+
+            <!-- Mô tả -->
+            <Label Grid.Row="2"
+                   Text="{Binding SelectedPoi.Description}"
+                   TextColor="#cbd5e1"
+                   FontSize="13"
+                   Margin="0,0,0,12" />
+
+            <!-- Info cards -->
+            <Grid Grid.Row="3"
+                  ColumnDefinitions="*,*,*"
+                  ColumnSpacing="8"
+                  Margin="0,0,0,14">
+
+              <Border Grid.Column="0"
+                      BackgroundColor="#1e3a5f"
+                      StrokeShape="RoundRectangle 10"
+                      Padding="10,8">
+                <VerticalStackLayout Spacing="2">
+                  <Label Text="⏰" FontSize="16"
+                         HorizontalOptions="Center" />
+                  <Label Text="{Binding SelectedPoi.Hours}"
+                         TextColor="White" FontSize="11"
+                         HorizontalOptions="Center"
+                         LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+              </Border>
+
+              <Border Grid.Column="1"
+                      BackgroundColor="#1a3a1a"
+                      StrokeShape="RoundRectangle 10"
+                      Padding="10,8">
+                <VerticalStackLayout Spacing="2">
+                  <Label Text="💰" FontSize="16"
+                         HorizontalOptions="Center" />
+                  <Label Text="{Binding SelectedPoi.PriceRange}"
+                         TextColor="#4ade80" FontSize="11"
+                         HorizontalOptions="Center" />
+                </VerticalStackLayout>
+              </Border>
+
+              <Border Grid.Column="2"
+                      BackgroundColor="#2d1b4e"
+                      StrokeShape="RoundRectangle 10"
+                      Padding="10,8">
+                <VerticalStackLayout Spacing="2">
+                  <Label Text="📍" FontSize="16"
+                         HorizontalOptions="Center" />
+                  <Label Text="{Binding SelectedPoi.DistanceText}"
+                         TextColor="#22d3ee" FontSize="11"
+                         FontAttributes="Bold"
+                         HorizontalOptions="Center" />
+                </VerticalStackLayout>
+              </Border>
+            </Grid>
+
+            <!-- Địa chỉ -->
+            <Label Grid.Row="4"
+                   Text="{Binding SelectedPoi.Address, StringFormat='📌 {0}'}"
+                   TextColor="#64748b"
+                   FontSize="12"
+                   Margin="0,0,0,16" />
+
+            <!-- Action buttons -->
+            <Grid Grid.Row="5"
+                  RowDefinitions="Auto,Auto"
+                  RowSpacing="8">
+
+              <!-- Row 1: Dẫn đường + Audio -->
+              <Grid Grid.Row="0"
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="{Binding UiNavigate}"
+                        Command="{Binding DrawRouteCommand}"
+                        CommandParameter="{Binding SelectedPoi}"
+                        BackgroundColor="#f97316"
+                        TextColor="White"
+                        CornerRadius="14"
+                        FontAttributes="Bold"
+                        HeightRequest="48" />
+
+                <Button Grid.Column="1"
+                        x:Name="btnAudio"
+                        Command="{Binding ToggleAudioCommand}"
+                        BackgroundColor="#7c3aed"
+                        TextColor="White"
+                        CornerRadius="14"
+                        FontAttributes="Bold"
+                        HeightRequest="48" />
+              </Grid>
+
+              <!-- Row 2: QR Code -->
+              <Button Grid.Row="1"
+                      Text="📱 Hiển thị QR — Quét để xem trên điện thoại"
+                      Clicked="OnShowQrClicked"
+                      BackgroundColor="#0e7490"
+                      TextColor="White"
+                      CornerRadius="14"
+                      FontSize="13"
+                      HeightRequest="44" />
+            </Grid>
+          </Grid>
+        </Border>
+      </Grid>
+
+    </Grid><!-- end map grid -->
+
+    <!-- ═══════════════════════════════════
+         ROW 2 — SEARCH BAR
+    ═══════════════════════════════════ -->
+    <Grid Grid.Row="2"
+          BackgroundColor="#1e293b"
+          ColumnDefinitions="*,52"
+          Padding="12,8"
+          ColumnSpacing="8">
+
+      <Border Grid.Column="0"
+              BackgroundColor="#0f172a"
+              StrokeShape="RoundRectangle 14"
+              Stroke="#334155"
+              Padding="8,0">
+        <Entry Placeholder="{Binding UiSearchHint}"
+               PlaceholderColor="#475569"
+               TextColor="White"
+               BackgroundColor="Transparent"
+               Text="{Binding SearchText}"
+               ReturnType="Search"
+               ReturnCommand="{Binding SearchCommand}"
+               VerticalOptions="Center" />
+      </Border>
+
+      <Button Grid.Column="1"
+              Text="🔍"
+              Command="{Binding SearchCommand}"
+              BackgroundColor="#f97316"
+              TextColor="White"
+              CornerRadius="14"
+              FontSize="18"
+              Padding="0" />
+    </Grid>
+
+  </Grid><!-- end root grid -->
+</ContentPage>
