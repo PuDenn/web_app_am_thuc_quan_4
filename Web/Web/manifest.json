@@ -1,0 +1,17 @@
+{
+  "name": "Ẩm Thực Quận 4",
+  "short_name": "AmThuc Q4",
+  "description": "Khám phá ẩm thực đường phố Quận 4, Sài Gòn",
+  "start_url": "/poi.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#E65100",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=AmThucQ4",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Ẩm Thực Quận 4 Admin</title>
+  <link rel="stylesheet" href="css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>🍜 Admin Panel</h1>
+      <p>Ẩm Thực Quận 4</p>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('overview',this)">
+        <span class="nav-icon">📊</span><span>Tổng quan</span>
+      </button>
+      <button class="nav-item" onclick="showPage('poi-stats',this)">
+        <span class="nav-icon">📍</span><span>Thống kê POI</span>
+      </button>
+      <button class="nav-item" onclick="showPage('manage-poi',this)">
+        <span class="nav-icon">🏪</span><span>Quản lý Quán</span>
+      </button>
+      <button class="nav-item" onclick="showPage('manage-user',this)">
+        <span class="nav-icon">👥</span><span>Quản lý User</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">v1.0 — LAN Dashboard</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <h2 id="pageTitle">Tổng quan</h2>
+      <div class="topbar-right">
+        <span class="badge" id="adminName">Admin</span>
+        <button class="btn-logout" onclick="doLogout()">🚪 Đăng xuất</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PAGE: TỔNG QUAN -->
+      <div id="page-overview" class="page active">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-icon">🏪</span>
+            <div class="kpi-label">Tổng số POI</div>
+            <div class="kpi-value" id="kpiPoi">--</div>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-icon">👁️</span>
+            <div class="kpi-label">Lượt xem hôm nay</div>
+            <div class="kpi-value" id="kpiViews">--</div>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-icon">🎙️</span>
+            <div class="kpi-label">Phát audio hôm nay</div>
+            <div class="kpi-value" id="kpiAudio">--</div>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-icon">📱</span>
+            <div class="kpi-label">Quét QR hôm nay</div>
+            <div class="kpi-value" id="kpiQR">--</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📈 Lượt xem 7 ngày gần nhất</div>
+            <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-title">🏆 Top 5 POI được xem nhiều nhất</div>
+            <table id="topTable">
+              <thead><tr><th>#</th><th>Tên quán</th><th>Xem</th><th>Audio</th><th>QR</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <p style="font-size:12px;color:#94a3b8;text-align:right">
+          Tự động cập nhật mỗi 30 giây · <span id="lastRefresh"></span>
+        </p>
+      </div>
+
+      <!-- PAGE: THỐNG KÊ POI -->
+      <div id="page-poi-stats" class="page">
+        <div class="card">
+          <div class="card-title">📍 Thống kê chi tiết theo POI</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+            <select id="poiSelect" onchange="loadPoiStats()">
+              <option value="">-- Chọn POI --</option>
+            </select>
+            <input type="date" id="fromDate" />
+            <input type="date" id="toDate" />
+            <button class="btn btn-primary" onclick="loadPoiStats()">Lọc</button>
+          </div>
+          <div id="poiStatsCards" style="display:none">
+            <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+              <div class="kpi-card"><div class="kpi-label">Lượt xem</div><div class="kpi-value" id="psViews">0</div></div>
+              <div class="kpi-card"><div class="kpi-label">Lượt audio</div><div class="kpi-value" id="psAudio">0</div></div>
+              <div class="kpi-card"><div class="kpi-label">Lượt QR</div><div class="kpi-value" id="psQR">0</div></div>
+            </div>
+            <div class="chart-wrap" style="margin-top:20px"><canvas id="barChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: QUẢN LÝ QUÁN -->
+      <div id="page-manage-poi" class="page">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="card-title" style="margin:0">🏪 Danh sách Quán ăn</div>
+            <button class="btn btn-primary" onclick="showPoiForm()">➕ Thêm quán</button>
+          </div>
+          <table id="poiTable">
+            <thead><tr><th>ID</th><th>Tên quán</th><th>Danh mục</th><th>Địa chỉ</th><th>Hiển thị</th><th>Thao tác</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Form thêm/sửa POI -->
+        <div id="poiForm" class="card" style="display:none">
+          <div class="card-title" id="poiFormTitle">➕ Thêm quán mới</div>
+          <input type="hidden" id="poiId" />
+          <div class="grid-2">
+            <div class="form-group"><label>Tên quán *</label><input type="text" id="poiName" style="width:100%" /></div>
+            <div class="form-group"><label>Danh mục</label><input type="text" id="poiCategory" style="width:100%" /></div>
+            <div class="form-group"><label>Icon</label><input type="text" id="poiIcon" style="width:100%" placeholder="🍜" /></div>
+            <div class="form-group"><label>Địa chỉ</label><input type="text" id="poiAddress" style="width:100%" /></div>
+            <div class="form-group"><label>Giờ mở cửa</label><input type="text" id="poiHours" style="width:100%" /></div>
+            <div class="form-group"><label>Giá</label><input type="text" id="poiPrice" style="width:100%" /></div>
+            <div class="form-group"><label>Latitude</label><input type="text" id="poiLat" style="width:100%" /></div>
+            <div class="form-group"><label>Longitude</label><input type="text" id="poiLng" style="width:100%" /></div>
+            <div class="form-group"><label>URL Ảnh</label><input type="text" id="poiImage" style="width:100%" /></div>
+          </div>
+          <div class="form-group"><label>Nội dung thuyết minh (TTS)</label>
+            <textarea id="poiScript" style="width:100%;height:80px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-family:inherit;font-size:14px"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-primary" onclick="savePoi()">💾 Lưu</button>
+            <button class="btn" style="background:#e2e8f0" onclick="document.getElementById('poiForm').style.display='none'">Hủy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: QUẢN LÝ USER -->
+      <div id="page-manage-user" class="page">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="card-title" style="margin:0">👥 Danh sách tài khoản</div>
+            <button class="btn btn-primary" onclick="showAddUser()">➕ Thêm user</button>
+          </div>
+          <table id="userTable">
+            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<script type="module">
+import { requireAuth, logout, getUser } from './js/auth.js';
+import { getOverview, getTopPoi, getTimeline, getPoiStats,
+         getPois, createPoi, updatePoi, deletePoi,
+         getUsers, createUser, toggleUser, deleteUser } from './js/api.js';
+import { drawLineChart, drawBarChart } from './js/charts.js';
+
+if (!requireAuth()) throw new Error('not auth');
+document.getElementById('adminName').textContent = getUser() || 'Admin';
+
+// ── Page switch ────────────────────────────────────
+const titles = {
+  overview: 'Tổng quan', 'poi-stats': 'Thống kê POI',
+  'manage-poi': 'Quản lý Quán', 'manage-user': 'Quản lý User'
+};
+window.showPage = function(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('pageTitle').textContent = titles[name];
+  if (name === 'overview')     loadOverview();
+  if (name === 'manage-poi')   loadPois();
+  if (name === 'manage-user')  loadUsers();
+  if (name === 'poi-stats')    loadPoiDropdown();
+};
+
+window.doLogout = logout;
+
+// ── Overview ───────────────────────────────────────
+async function loadOverview() {
+  try {
+    const [ov, top, tl] = await Promise.all([
+      getOverview(), getTopPoi(5),
+      getTimeline(...last7Days())
+    ]);
+    document.getElementById('kpiPoi').textContent    = ov.totalPOIs;
+    document.getElementById('kpiViews').textContent  = ov.totalVisitsToday;
+    document.getElementById('kpiAudio').textContent  = ov.totalAudioPlays;
+    document.getElementById('kpiQR').textContent     = ov.totalQRScans;
+
+    const labels = tl.map(d => d.date.slice(5));
+    const data   = tl.map(d => d.views);
+    drawLineChart('lineChart', labels, data, 'Lượt xem');
+
+    const tbody = document.querySelector('#topTable tbody');
+    tbody.innerHTML = top.map((p,i) =>
+      `<tr><td>${i+1}</td><td>${p.poiName}</td><td>${p.viewCount}</td><td>${p.audioCount}</td><td>${p.qrCount}</td></tr>`
+    ).join('');
+
+    document.getElementById('lastRefresh').textContent =
+      'Cập nhật: ' + new Date().toLocaleTimeString('vi-VN');
+  } catch(e) { console.error(e); }
+}
+
+function last7Days() {
+  const to   = new Date();
+  const from = new Date(); from.setDate(from.getDate() - 7);
+  const fmt  = d => d.toISOString().split('T')[0];
+  return [fmt(from), fmt(to)];
+}
+
+// ── POI Stats ──────────────────────────────────────
+async function loadPoiDropdown() {
+  const pois = await getPois();
+  const sel  = document.getElementById('poiSelect');
+  pois.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+}
+
+window.loadPoiStats = async function() {
+  const id = document.getElementById('poiSelect').value;
+  if (!id) return;
+  try {
+    const s = await getPoiStats(id);
+    document.getElementById('psViews').textContent = s.viewCount;
+    document.getElementById('psAudio').textContent = s.audioPlayCount;
+    document.getElementById('psQR').textContent    = s.qrScanCount;
+    document.getElementById('poiStatsCards').style.display = 'block';
+    const labels = s.viewsByDate.map(d => d.date.slice(5));
+    drawBarChart('barChart', labels, [
+      { label:'Xem', data: s.viewsByDate.map(d=>d.count), backgroundColor:'#1A237E' },
+    ]);
+  } catch(e) { alert(e.message); }
+};
+
+// ── Manage POI ─────────────────────────────────────
+let allPois = [];
+async function loadPois() {
+  allPois = await getPois();
+  const tbody = document.querySelector('#poiTable tbody');
+  tbody.innerHTML = allPois.map(p => `
+    <tr>
+      <td>${p.id}</td>
+      <td>${p.categoryIcon||'🍽️'} ${p.name}</td>
+      <td>${p.category||''}</td>
+      <td style="font-size:12px;color:#64748b">${p.address||''}</td>
+      <td>${p.isVisible ? '✅':'❌'}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="editPoi(${p.id})">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="delPoi(${p.id})" style="margin-left:4px">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+window.showPoiForm = function(poi = null) {
+  document.getElementById('poiForm').style.display = 'block';
+  document.getElementById('poiFormTitle').textContent = poi ? '✏️ Sửa quán' : '➕ Thêm quán mới';
+  document.getElementById('poiId').value       = poi?.id || '';
+  document.getElementById('poiName').value     = poi?.name || '';
+  document.getElementById('poiCategory').value = poi?.category || '';
+  document.getElementById('poiIcon').value     = poi?.categoryIcon || '🍜';
+  document.getElementById('poiAddress').value  = poi?.address || '';
+  document.getElementById('poiHours').value    = poi?.hours || '';
+  document.getElementById('poiPrice').value    = poi?.priceRange || '';
+  document.getElementById('poiLat').value      = poi?.latitude || '';
+  document.getElementById('poiLng').value      = poi?.longitude || '';
+  document.getElementById('poiImage').value    = poi?.imageUrl || '';
+  document.getElementById('poiScript').value   = poi?.audioScript || '';
+  document.getElementById('poiForm').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.editPoi = function(id) {
+  const poi = allPois.find(p => p.id === id);
+  if (poi) showPoiForm(poi);
+};
+
+window.savePoi = async function() {
+  const id   = document.getElementById('poiId').value;
+  const data = {
+    name: document.getElementById('poiName').value,
+    category: document.getElementById('poiCategory').value,
+    categoryIcon: document.getElementById('poiIcon').value,
+    address: document.getElementById('poiAddress').value,
+    hours: document.getElementById('poiHours').value,
+    priceRange: document.getElementById('poiPrice').value,
+    latitude: parseFloat(document.getElementById('poiLat').value) || 0,
+    longitude: parseFloat(document.getElementById('poiLng').value) || 0,
+    imageUrl: document.getElementById('poiImage').value,
+    audioScript: document.getElementById('poiScript').value,
+    isVisible: true,
+  };
+  try {
+    if (id) await updatePoi(id, data);
+    else    await createPoi(data);
+    document.getElementById('poiForm').style.display = 'none';
+    await loadPois();
+  } catch(e) { alert('Lỗi: ' + e.message); }
+};
+
+window.delPoi = async function(id) {
+  if (!confirm('Xóa quán này?')) return;
+  try { await deletePoi(id); await loadPois(); }
+  catch(e) { alert(e.message); }
+};
+
+// ── Manage Users ───────────────────────────────────
+async function loadUsers() {
+  const users = await getUsers();
+  const tbody = document.querySelector('#userTable tbody');
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td>${u.username}</td>
+      <td style="font-size:12px">${u.email}</td>
+      <td><span style="background:${u.role==='Admin'?'#1A237E':'#e2e8f0'};color:${u.role==='Admin'?'white':'#374151'};padding:2px 8px;border-radius:10px;font-size:12px">${u.role}</span></td>
+      <td>${u.isActive ? '✅ Hoạt động' : '🔒 Đã khóa'}</td>
+      <td>
+        <button class="btn btn-sm" style="background:#e2e8f0" onclick="toggleU(${u.id})">${u.isActive?'🔒 Khóa':'🔓 Mở'}</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteU(${u.id})" style="margin-left:4px">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+window.showAddUser = async function() {
+  const username = prompt('Tên đăng nhập:'); if (!username) return;
+  const email    = prompt('Email:');         if (!email) return;
+  const password = prompt('Mật khẩu (min 6 ký tự):'); if (!password || password.length < 6) { alert('Mật khẩu quá ngắn'); return; }
+  const role     = confirm('Cấp quyền Admin?') ? 'Admin' : 'User';
+  try {
+    await createUser({ username, email, password, role });
+    await loadUsers();
+  } catch(e) { alert(e.message); }
+};
+
+window.toggleU = async function(id) {
+  try { await toggleUser(id); await loadUsers(); }
+  catch(e) { alert(e.message); }
+};
+
+window.deleteU = async function(id) {
+  if (!confirm('Xóa tài khoản này?')) return;
+  try { await deleteUser(id); await loadUsers(); }
+  catch(e) { alert(e.message); }
+};
+
+// ── Auto load & refresh ────────────────────────────
+loadOverview();
+setInterval(loadOverview, 30000);
+</script>
+</body>
+</html>
