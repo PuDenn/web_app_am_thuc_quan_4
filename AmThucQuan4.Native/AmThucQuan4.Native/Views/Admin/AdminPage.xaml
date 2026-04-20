@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:AmThucQuan4.Native.ViewModels.Admin"
+             xmlns:svc="clr-namespace:AmThucQuan4.Native.Services"
+             xmlns:models="clr-namespace:AmThucQuan4.Native.Models"
+             x:Class="AmThucQuan4.Native.Views.Admin.AdminPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#0f172a">
+
+  <Grid RowDefinitions="56,48,*,64">
+
+    <!-- ═══ HEADER ═══ -->
+    <Grid Grid.Row="0" BackgroundColor="#1e293b"
+          ColumnDefinitions="Auto,*,Auto"
+          Padding="16,0">
+
+      <Button Grid.Column="0"
+              Text="← App"
+              Clicked="OnBackToApp"
+              BackgroundColor="Transparent"
+              TextColor="#94a3b8"
+              FontSize="14"
+              VerticalOptions="Center" />
+
+      <VerticalStackLayout Grid.Column="1"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center">
+        <Label Text="⚙️ Admin Panel"
+               TextColor="#f97316"
+               FontSize="17"
+               FontAttributes="Bold"
+               HorizontalOptions="Center" />
+        <Label Text="{Binding AdminUsername, StringFormat='👤 {0}'}"
+               TextColor="#64748b"
+               FontSize="11"
+               HorizontalOptions="Center" />
+      </VerticalStackLayout>
+
+      <ActivityIndicator Grid.Column="2"
+                         IsRunning="{Binding IsBusy}"
+                         IsVisible="{Binding IsBusy}"
+                         Color="#f97316"
+                         WidthRequest="24"
+                         VerticalOptions="Center" />
+    </Grid>
+
+    <!-- ═══ TAB BAR ═══ -->
+    <Grid Grid.Row="1"
+          ColumnDefinitions="*,*"
+          BackgroundColor="#1e293b">
+
+      <Button Grid.Column="0"
+              Text="🏪 Quản lý Quán"
+              Clicked="OnPoisTabClicked"
+              x:Name="btnPoisTab"
+              BackgroundColor="#f97316"
+              TextColor="White"
+              FontSize="13"
+              FontAttributes="Bold"
+              CornerRadius="0" />
+
+      <Button Grid.Column="1"
+              Text="👥 Quản lý Users"
+              Clicked="OnUsersTabClicked"
+              x:Name="btnUsersTab"
+              BackgroundColor="#1e293b"
+              TextColor="#94a3b8"
+              FontSize="13"
+              CornerRadius="0" />
+    </Grid>
+
+    <!-- ═══ CONTENT AREA ═══ -->
+    <Grid Grid.Row="2">
+
+      <!-- ══ POIs TAB ══ -->
+      <Grid IsVisible="{Binding IsPoisTab}"
+            RowDefinitions="*">
+
+        <CollectionView ItemsSource="{Binding Pois}"
+                        SelectionMode="None">
+          <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:PoiModel">
+              <Grid ColumnDefinitions="Auto,*,Auto"
+                    Padding="12,10"
+                    BackgroundColor="Transparent">
+
+                <!-- Icon -->
+                <Border Grid.Column="0"
+                        WidthRequest="44" HeightRequest="44"
+                        BackgroundColor="#7c3aed"
+                        StrokeShape="RoundRectangle 22"
+                        VerticalOptions="Center">
+                  <Label Text="{Binding CategoryIcon}"
+                         FontSize="20"
+                         HorizontalOptions="Center"
+                         VerticalOptions="Center" />
+                </Border>
+
+                <!-- Info -->
+                <VerticalStackLayout Grid.Column="1"
+                                     Padding="10,0"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+                  <Label Text="{Binding Name}"
+                         TextColor="White"
+                         FontSize="14"
+                         FontAttributes="Bold" />
+                  <Label Text="{Binding Category}"
+                         TextColor="#f97316"
+                         FontSize="12" />
+                  <Label Text="{Binding Address}"
+                         TextColor="#64748b"
+                         FontSize="11"
+                         LineBreakMode="TailTruncation" />
+                </VerticalStackLayout>
+
+                <!-- Actions -->
+                <VerticalStackLayout Grid.Column="2"
+                                     Spacing="4"
+                                     VerticalOptions="Center">
+                  <Button Text="✏️"
+                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}},
+                                            Path=OpenEditPoiFormCommand}"
+                          CommandParameter="{Binding .}"
+                          BackgroundColor="#1e40af"
+                          TextColor="White"
+                          CornerRadius="8"
+                          FontSize="14"
+                          Padding="8,4"
+                          HeightRequest="32" />
+                  <Button Text="🗑️"
+                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}},
+                                            Path=DeletePoiCommand}"
+                          CommandParameter="{Binding .}"
+                          BackgroundColor="#991b1b"
+                          TextColor="White"
+                          CornerRadius="8"
+                          FontSize="14"
+                          Padding="8,4"
+                          HeightRequest="32" />
+                </VerticalStackLayout>
+              </Grid>
+            </DataTemplate>
+          </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Status bar -->
+        <Label Text="{Binding StatusText}"
+               TextColor="#22d3ee"
+               FontSize="12"
+               HorizontalOptions="Center"
+               VerticalOptions="End"
+               Margin="0,0,0,8" />
+      </Grid>
+
+      <!-- ══ USERS TAB ══ -->
+      <CollectionView IsVisible="{Binding IsUsersTab}"
+                      ItemsSource="{Binding Users}"
+                      SelectionMode="None">
+          <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+          </CollectionView.ItemsLayout>
+        <CollectionView.ItemTemplate>
+          <DataTemplate x:DataType="svc:UserModel">
+            <Grid ColumnDefinitions="*,Auto"
+                  Padding="16,12"
+                  BackgroundColor="Transparent">
+
+              <!-- User info -->
+              <VerticalStackLayout Grid.Column="0" Spacing="3">
+                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
+                  <Label Grid.Column="0"
+                         Text="{Binding Username}"
+                         TextColor="White"
+                         FontSize="15"
+                         FontAttributes="Bold" />
+                  <Border Grid.Column="1"
+                          BackgroundColor="#1e3a5f"
+                          StrokeShape="RoundRectangle 8"
+                          Padding="6,2">
+                    <Label Text="{Binding Role}"
+                           TextColor="#60a5fa"
+                           FontSize="11" />
+                  </Border>
+                </Grid>
+                <Label Text="{Binding Email}"
+                       TextColor="#64748b"
+                       FontSize="12" />
+                <Label Text="{Binding StatusText}"
+                       TextColor="{Binding StatusColor}"
+                       FontSize="12" />
+                <Label Text="{Binding LastLoginText, StringFormat='🕐 {0}'}"
+                       TextColor="#475569"
+                       FontSize="11" />
+              </VerticalStackLayout>
+
+              <!-- Actions -->
+              <VerticalStackLayout Grid.Column="1"
+                                   Spacing="4"
+                                   VerticalOptions="Center">
+                <Button Text="{Binding IsActive, Converter={StaticResource BoolToAudioText}}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}},
+                                          Path=ToggleUserCommand}"
+                        CommandParameter="{Binding .}"
+                        BackgroundColor="#854d0e"
+                        TextColor="White"
+                        CornerRadius="8"
+                        FontSize="11"
+                        Padding="8,4"
+                        HeightRequest="32" />
+                <Button Text="🗑️ Xóa"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}},
+                                          Path=DeleteUserCommand}"
+                        CommandParameter="{Binding .}"
+                        BackgroundColor="#991b1b"
+                        TextColor="White"
+                        CornerRadius="8"
+                        FontSize="11"
+                        Padding="8,4"
+                        HeightRequest="32" />
+              </VerticalStackLayout>
+            </Grid>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+      </CollectionView>
+
+      <!-- ══ POI FORM OVERLAY ══ -->
+      <Grid IsVisible="{Binding IsPoiFormVisible}"
+            BackgroundColor="#000000CC"
+            ZIndex="50">
+        <Border BackgroundColor="#1e293b"
+                StrokeShape="RoundRectangle 20"
+                Stroke="#334155"
+                Margin="16"
+                VerticalOptions="Center">
+          <ScrollView MaximumHeightRequest="560">
+            <VerticalStackLayout Padding="20" Spacing="12">
+
+              <!-- Form header -->
+              <Label Text="{Binding IsEditMode, Converter={StaticResource BoolToAudioText}}"
+                     x:Name="formTitle"
+                     TextColor="#f97316"
+                     FontSize="18"
+                     FontAttributes="Bold" />
+
+              <!-- Tên quán -->
+              <Label Text="Tên quán *" TextColor="#94a3b8" FontSize="12" />
+              <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                      Stroke="#334155" Padding="12,4">
+                <Entry Text="{Binding EditingPoi.Name}"
+                       Placeholder="VD: Cơm Tấm Bà Út"
+                       PlaceholderColor="#475569"
+                       TextColor="White"
+                       BackgroundColor="Transparent" />
+              </Border>
+
+              <!-- Category + Icon -->
+              <Grid ColumnDefinitions="*,80" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0">
+                  <Label Text="Danh mục" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.Category}"
+                           Placeholder="Cơm Tấm, Phở..."
+                           PlaceholderColor="#475569"
+                           TextColor="White"
+                           BackgroundColor="Transparent" />
+                  </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1">
+                  <Label Text="Icon" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.CategoryIcon}"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           FontSize="20" />
+                  </Border>
+                </VerticalStackLayout>
+              </Grid>
+
+              <!-- Địa chỉ -->
+              <Label Text="Địa chỉ" TextColor="#94a3b8" FontSize="12" />
+              <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                      Stroke="#334155" Padding="12,4">
+                <Entry Text="{Binding EditingPoi.Address}"
+                       Placeholder="123 Đường ABC, Quận 4"
+                       PlaceholderColor="#475569"
+                       TextColor="White"
+                       BackgroundColor="Transparent" />
+              </Border>
+
+              <!-- Giờ + Giá -->
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0">
+                  <Label Text="Giờ mở cửa" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.Hours}"
+                           Placeholder="06:00 – 14:00"
+                           PlaceholderColor="#475569"
+                           TextColor="White"
+                           BackgroundColor="Transparent" />
+                  </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1">
+                  <Label Text="Giá" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.PriceRange}"
+                           Placeholder="35k – 65k"
+                           PlaceholderColor="#475569"
+                           TextColor="White"
+                           BackgroundColor="Transparent" />
+                  </Border>
+                </VerticalStackLayout>
+              </Grid>
+
+              <!-- Tọa độ - có nút chọn trên bản đồ -->
+              <Button Text="🗺️ Chọn vị trí trên bản đồ"
+                      Clicked="OnPickLocationClicked"
+                      BackgroundColor="#1e40af"
+                      TextColor="White"
+                      CornerRadius="10"
+                      FontSize="13"
+                      HeightRequest="40" />
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Column="0">
+                  <Label Text="Latitude" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.Latitude}"
+                           Placeholder="10.7575"
+                           PlaceholderColor="#475569"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           Keyboard="Numeric" />
+                  </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1">
+                  <Label Text="Longitude" TextColor="#94a3b8" FontSize="12" />
+                  <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                          Stroke="#334155" Padding="12,4">
+                    <Entry Text="{Binding EditingPoi.Longitude}"
+                           Placeholder="106.7012"
+                           PlaceholderColor="#475569"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           Keyboard="Numeric" />
+                  </Border>
+                </VerticalStackLayout>
+              </Grid>
+
+              <!-- Mô tả -->
+              <Label Text="Mô tả" TextColor="#94a3b8" FontSize="12" />
+              <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                      Stroke="#334155" Padding="12,4">
+                <Editor Text="{Binding EditingPoi.Description}"
+                        Placeholder="Mô tả về quán..."
+                        PlaceholderColor="#475569"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        HeightRequest="80"
+                        AutoSize="TextChanges" />
+              </Border>
+
+              <!-- Ảnh quán — chọn từ điện thoại hoặc nhập URL -->
+              <Label Text="Ảnh quán" TextColor="#94a3b8" FontSize="12" />
+
+              <!-- Preview ảnh -->
+              <Border StrokeShape="RoundRectangle 10"
+                      Stroke="#334155"
+                      HeightRequest="130"
+                      IsVisible="{Binding HasPoiImage}"
+                      BackgroundColor="#1e293b">
+                <Image x:Name="imgPoiPreview"
+                       Aspect="AspectFill"
+                       Source="{Binding EditingPoi.ImageUrl}" />
+              </Border>
+
+              <!-- Nút chọn ảnh -->
+              <Button Text="📷 Chọn ảnh từ điện thoại"
+                      Clicked="OnPickImageClicked"
+                      BackgroundColor="#0e7490"
+                      TextColor="White"
+                      CornerRadius="10"
+                      FontSize="13"
+                      HeightRequest="40" />
+
+              <!-- Hoặc nhập URL -->
+              <Label Text="Hoặc nhập URL ảnh" TextColor="#64748b" FontSize="11" />
+              <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                      Stroke="#334155" Padding="12,4">
+                <Entry x:Name="entryImageUrl"
+                       Text="{Binding EditingPoi.ImageUrl}"
+                       Placeholder="https://example.com/anh.jpg"
+                       PlaceholderColor="#475569"
+                       TextColor="White"
+                       BackgroundColor="Transparent"
+                       TextChanged="OnImageUrlChanged" />
+              </Border>
+
+              <!-- Audio Script -->
+              <Label Text="Nội dung thuyết minh (TTS)" TextColor="#94a3b8" FontSize="12" />
+              <Border BackgroundColor="#0f172a" StrokeShape="RoundRectangle 10"
+                      Stroke="#334155" Padding="12,4">
+                <Editor Text="{Binding EditingPoi.AudioScript}"
+                        Placeholder="Chào mừng bạn đến..."
+                        PlaceholderColor="#475569"
+                        TextColor="White"
+                        BackgroundColor="Transparent"
+                        HeightRequest="100"
+                        AutoSize="TextChanges" />
+              </Border>
+
+              <!-- Buttons -->
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,8,0,0">
+                <Button Grid.Column="0"
+                        Text="💾 Lưu"
+                        Command="{Binding SavePoiCommand}"
+                        BackgroundColor="#f97316"
+                        TextColor="White"
+                        CornerRadius="12"
+                        FontAttributes="Bold"
+                        HeightRequest="48" />
+                <Button Grid.Column="1"
+                        Text="✕ Hủy"
+                        Command="{Binding CancelPoiFormCommand}"
+                        BackgroundColor="#334155"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="48" />
+              </Grid>
+
+            </VerticalStackLayout>
+          </ScrollView>
+        </Border>
+      </Grid>
+
+    </Grid><!-- end content -->
+
+    <!-- ═══ BOTTOM ACTION BAR ═══ -->
+    <Grid Grid.Row="3"
+          BackgroundColor="#1e293b"
+          Padding="16,8">
+      <Button Text="➕ Thêm quán mới"
+              IsVisible="{Binding IsPoisTab}"
+              Command="{Binding OpenAddPoiFormCommand}"
+              BackgroundColor="#f97316"
+              TextColor="White"
+              CornerRadius="14"
+              FontAttributes="Bold"
+              HeightRequest="48" />
+
+      <Grid IsVisible="{Binding IsUsersTab}"
+            ColumnDefinitions="*,Auto">
+        <Label Grid.Column="0"
+               Text="{Binding Users.Count, StringFormat='Tổng cộng {0} tài khoản'}"
+               TextColor="#64748b"
+               FontSize="13"
+               VerticalOptions="Center" />
+        <Button Grid.Column="1"
+                Text="➕ Thêm user"
+                Clicked="OnAddUserClicked"
+                BackgroundColor="#7c3aed"
+                TextColor="White"
+                CornerRadius="12"
+                FontSize="13"
+                HeightRequest="40"
+                Padding="10,0" />
+      </Grid>
+    </Grid>
+
+  </Grid>
+</ContentPage>
